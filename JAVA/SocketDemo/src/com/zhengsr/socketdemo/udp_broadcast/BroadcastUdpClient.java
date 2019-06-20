@@ -24,10 +24,15 @@ public class BroadcastUdpClient {
 
         System.in.read();
         listener.exit();
+        for (Device device : listener.getDevices()) {
+            System.out.println("检测到的设备有: "+device.toString());
+        }
 
     }
 
-
+    /**
+     * 监听服务端发送回来的数据并打印出来
+     */
     private static class ResposeListener extends Thread{
         private int port;
         private boolean isFinish = false;
@@ -40,32 +45,31 @@ public class BroadcastUdpClient {
         @Override
         public void run() {
             super.run();
-
             try {
-                //监听回送端口
                 socket = new DatagramSocket(port);
-                byte[] buf = new byte[512];
-                DatagramPacket packet = new DatagramPacket(buf,buf.length);
-                //拿数据
-                socket.receive(packet);
+                while(!isFinish) {
+                    //监听回送端口
+                    byte[] buf = new byte[512];
+                    DatagramPacket packet = new DatagramPacket(buf, buf.length);
+                    //拿数据
+                    socket.receive(packet);
 
-                //拿到发送端的一些信息
-                String ip = packet.getAddress().getHostAddress();
-                int port = packet.getPort();
-                int length = packet.getLength();
+                    //拿到发送端的一些信息
+                    String ip = packet.getAddress().getHostAddress();
+                    int port = packet.getPort();
+                    int length = packet.getLength();
 
-                String msg = new String(buf, 0, length);
-                System.out.println("监听到: " + ip + "\tport: " + port + "\t信息: " + msg);
+                    String msg = new String(buf, 0, length);
+                    System.out.println("监听到: " + ip + "\tport: " + port + "\t信息: " + msg);
 
-                if (msg.length()>0){
-                    Device device = new Device(ip,port,msg);
-                    devices.add(device);
+                    if (msg.length() > 0) {
+                        Device device = new Device(ip, port, msg);
+                        devices.add(device);
+                    }
+
                 }
 
-
-
             }catch (Exception e){
-
             }finally {
                 exit();
             }
@@ -121,7 +125,8 @@ public class BroadcastUdpClient {
 
             DatagramPacket packet = new DatagramPacket(buf,
                     buf.length,
-                    InetAddress.getByName("255.255.255.255"),
+                    //InetAddress.getByName("172.16.29.255"),
+                    InetAddress.getByName(Constans.BROADCAST_IP),
                     Constans.PORT);
             //给服务端发送数据
             socket.send(packet);
