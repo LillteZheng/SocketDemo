@@ -1,12 +1,10 @@
-package com.zhengsr.socketdemo.udp;
+package com.zhengsr.socketdemo.demo2_udp.udp;
 
-import com.sun.xml.internal.bind.v2.runtime.reflect.opt.Const;
 import com.zhengsr.socketdemo.Constans;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.net.SocketException;
 
 /**
  * created by zhengshaorui

@@ -21,7 +21,7 @@ public class Client {
             Socket socket = new Socket();
             //超时时间
             socket.setSoTimeout(Constans.TIME_OUT);
-            //连接本地，端口8000，超时时间为3s
+            //连接服务器，端口8000，超时时间为3s
             socket.connect(new InetSocketAddress(Inet4Address.getLocalHost(), Constans.PORT),Constans.TIME_OUT);
             //打印基本信息
             System.out.println("客服端信息: "+socket.getLocalAddress()+" 端口: "+socket.getLocalPort());

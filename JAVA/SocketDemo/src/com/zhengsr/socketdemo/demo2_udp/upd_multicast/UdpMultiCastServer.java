@@ -1,6 +1,5 @@
-package com.zhengsr.socketdemo.upd_multicast;
+package com.zhengsr.socketdemo.demo2_udp.upd_multicast;
 
-import com.sun.org.apache.bcel.internal.generic.IF_ACMPEQ;
 import com.zhengsr.socketdemo.Constans;
 
 import java.io.IOException;

@@ -1,4 +1,4 @@
-package com.zhengsr.socketdemo.udp;
+package com.zhengsr.socketdemo.demo2_udp.udp;
 
 import com.zhengsr.socketdemo.Constans;
 
