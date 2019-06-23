@@ -21,7 +21,7 @@ public class Client {
             Socket socket = new Socket();
             //超时时间
             socket.setSoTimeout(Constans.TIME_OUT);
-            //连接服务器，端口8000，超时时间为3s
+            //2.通过 connect 连接服务器，端口8000，超时时间为3s
             socket.connect(new InetSocketAddress(Inet4Address.getLocalHost(), Constans.PORT),Constans.TIME_OUT);
             //打印基本信息
             System.out.println("客服端信息: "+socket.getLocalAddress()+" 端口: "+socket.getLocalPort());
@@ -29,7 +29,7 @@ public class Client {
 
             //获取终端输入流
             BufferedReader cmdReader = new BufferedReader(new InputStreamReader(System.in));
-            //2.拿到 inputstream 或者 outputstream 进行通信
+            //3.拿到 inputstream 或者 outputstream 进行通信
             PrintStream clientPrintStream = new PrintStream(socket.getOutputStream());
             BufferedReader clientReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 

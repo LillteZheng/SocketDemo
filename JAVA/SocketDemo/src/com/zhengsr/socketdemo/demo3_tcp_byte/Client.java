@@ -3,7 +3,10 @@ package com.zhengsr.socketdemo.demo3_tcp_byte;
 import com.zhengsr.socketdemo.Constans;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.*;
+import java.nio.ByteBuffer;
 
 /**
  * created by zhengshaorui
@@ -14,13 +17,35 @@ public class Client {
     public static void main(String[] args) throws IOException {
         Socket socket = createSocket();
         configSocket(socket);
-        //打印基础信息
-        System.out.println("客服端信息: "+socket.getLocalAddress()+" 端口: "+socket.getLocalPort());
-        System.out.println("服务端信息: "+socket.getInetAddress()+" 端口: "+socket.getPort());
 
         //连接服务器
         socket.connect(new InetSocketAddress(InetAddress.getLocalHost(), Constans.PORT));
 
+        //打印基础信息
+        System.out.println("客服端信息: "+socket.getLocalAddress()+" 端口: "+socket.getLocalPort());
+        System.out.println("服务端信息: "+socket.getInetAddress()+" 端口: "+socket.getPort());
+
+        System.out.println("开始传递基础数据");
+        OutputStream outputStream = socket.getOutputStream();
+        InputStream inputStream = socket.getInputStream();
+        byte[] buffer = new byte[256];
+        ByteBuffer byteBuffer = ByteBuffer.wrap(buffer);
+        byteBuffer.put((byte) 1);
+        byteBuffer.putChar('a');
+        byteBuffer.putInt(12345);
+        byteBuffer.putLong(23422345);
+        byteBuffer.putDouble(123435465);
+        byteBuffer.putFloat(234.234234f);
+        byteBuffer.put("hello 你好".getBytes());
+
+        outputStream.write(buffer,0,byteBuffer.position()+1);
+
+        //接受服务端
+        int count = inputStream.read(buffer);
+        System.out.println("发送成功，回收数量："+count);
+
+        outputStream.close();
+        socket.close();
     }
 
     private static void configSocket(Socket socket)  throws IOException{
