@@ -119,12 +119,11 @@ public class BroadcastUdpClient {
             System.out.println("开始发送广播");
             //1.获取 datagramSocket 实例,不创建端口，客户端的端口由系统随机分配
             DatagramSocket socket = new DatagramSocket();
-            //2.创建一个 udp 的数据包
-            byte[] buf = "hello world".getBytes();
+            //2.创建一个 udp_broad 的数据包
+            byte[] buf = Constans.createSn(Constans.BROADCAST_PORT).getBytes();
 
             DatagramPacket packet = new DatagramPacket(buf,
                     buf.length,
-                    //InetAddress.getByName("172.16.29.255"),
                     InetAddress.getByName(Constans.BROADCAST_IP),
                     Constans.PORT);
             //给服务端发送数据

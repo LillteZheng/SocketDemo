@@ -1,36 +1,33 @@
-package com.zhengsr.socketdemo.demo2_udp.udp_broadcast;
+package com.zhengsr.socketdemo.demo4_udp_tcp.server;
 
 import com.zhengsr.socketdemo.Constans;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.nio.ByteBuffer;
 import java.util.UUID;
-
 /**
  * created by zhengshaorui
- * time on 2019/6/19
- * upd 服务端，用来接收客户端信息
+ * time on 2019/6/26
  */
-public class BroadcastUdpServer {
+public class UdpProvider {
 
-    public static void main(String[] args) throws IOException {
+    private static Provider mProvider;
 
-        String sn = UUID.randomUUID().toString();
-        Provider provider = new Provider(sn);
-        provider.start();
+    static void start(){
+        mProvider = new Provider();
+        mProvider.start();
+    }
 
-        System.in.read();
-        provider.exit();
-
+    static void stop(){
+        mProvider.exit();
     }
 
     static class Provider extends Thread{
-        private String sn;
         private DatagramSocket socket ;
         private boolean isFinish = false;
-        public Provider(String sn) {
-            this.sn = sn;
+        public Provider() {
         }
 
         @Override
@@ -43,39 +40,41 @@ public class BroadcastUdpServer {
                 socket = new DatagramSocket(Constans.PORT);
                 while (!isFinish) {
                     //2.创建一个 udp_broad 的数据包
-                    byte[] buf = new byte[512];
-                    DatagramPacket packet = new DatagramPacket(buf, buf.length);
+                    byte[] bytes = new byte[512];
+                    DatagramPacket packet = new DatagramPacket(bytes, bytes.length);
                     //3.开始阻塞获取udp数据包
                     socket.receive(packet);
+
+
 
                     //拿到发送端的一些信息
                     String ip = packet.getAddress().getHostAddress();
                     int port = packet.getPort();
                     int length = packet.getLength();
 
-                    String msg = new String(buf, 0, length);
-                    System.out.println("客户端: " + ip + "\tport: " + port + "\t信息: " + msg);
-
+                    ByteBuffer byteBuffer = ByteBuffer.wrap(bytes,0,length);
+                    int cmd = byteBuffer.getInt();
+                    int responsePort = byteBuffer.getInt();
+                    System.out.println("客户端: " + ip + "\tport: " + port +"\t回送接口: "+responsePort);
                     /**
-                     * 给客户端发送消息
+                     * 给客户端发送消息  cmd 必须匹配
                      */
-                    int receivePort = Constans.parsePort(msg);
-                    System.out.println(receivePort);
-                    if (receivePort != -1) {
-                        byte[] receiveMsg = "我是设备A".getBytes();
-                        DatagramPacket receivePacket = new DatagramPacket(receiveMsg,
-                                receiveMsg.length,
+                    if (Constans.CMD_BROAD == cmd) {
+                        ByteBuffer buffer = ByteBuffer.allocate(256);
+                        buffer.putInt(Constans.CMD_BRO_RESPONSE);
+                        buffer.putInt(Constans.TCP_PORT);
+                        buffer.put(("我是设备: "+ UUID.randomUUID().toString()).getBytes());
+                        DatagramPacket receivePacket = new DatagramPacket(buffer.array(),
+                                buffer.position(),
                                 packet.getAddress(), //目标地址
-                                receivePort);      //广播端口
+                                responsePort);      //广播端口
 
                         socket.send(receivePacket);
                     }
                 }
-                //关闭资源
-                socket.close();
                 System.out.println("结束");
             } catch (IOException e) {
-              //  e.printStackTrace();
+                //  e.printStackTrace();
                 //忽略错误
             }finally {
                 exit();

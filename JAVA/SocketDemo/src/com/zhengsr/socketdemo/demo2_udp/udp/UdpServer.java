@@ -17,7 +17,7 @@ public class UdpServer {
         System.out.println("UDP 服务端已经启动");
         //1.获取 datagramSocket 实例,并监听某个端口
         DatagramSocket socket = new DatagramSocket(Constans.PORT);
-        //2.创建一个 udp 的数据包
+        //2.创建一个 udp_broad 的数据包
         byte[] buf = new byte[512];
         DatagramPacket packet = new DatagramPacket(buf,buf.length);
         //3.开始阻塞获取udp数据包

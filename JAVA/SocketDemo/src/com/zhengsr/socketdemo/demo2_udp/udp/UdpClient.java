@@ -10,14 +10,14 @@ import java.net.InetAddress;
 /**
  * created by zhengshaorui
  * time on 2019/6/19
- * udp 的客户端
+ * udp_broad 的客户端
  */
 public class UdpClient {
     public static void main(String[] args) throws IOException {
         System.out.println("UDP 客户端已经启动");
         //1.获取 datagramSocket 实例,不创建端口，客户端的端口由系统随机分配
         DatagramSocket socket = new DatagramSocket();
-        //2.创建一个 udp 的数据包
+        //2.创建一个 udp_broad 的数据包
         byte[] buf = "hello world".getBytes();
 
         DatagramPacket packet = new DatagramPacket(buf,
