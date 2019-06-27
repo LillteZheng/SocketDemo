@@ -1,0 +1,12 @@
+<component name="ArtifactManager">
+  <artifact type="jar" build-on-make="true" name="ChatClient:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/ChatClient_jar</output-path>
+    <root id="archive" name="ChatClient.jar">
+      <element id="directory" name="META-INF">
+        <element id="file-copy" path="$PROJECT_DIR$/src/com/zhengsr/chatroom/client/META-INF/MANIFEST.MF" />
+      </element>
+      <element id="module-output" name="ChatRoom" />
+      <element id="module-source" name="ChatRoom" />
+    </root>
+  </artifact>
+</component>
