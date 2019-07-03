@@ -29,7 +29,7 @@ public class NioclientA {
         socketChannel.configureBlocking(false);
         //4.连接服务器
         socketChannel.connect(new InetSocketAddress("localhost", Constants.PORT));
-        //注册读事件，读取客户端信息
+        //注册读事件，读取服户端信息
         socketChannel.register(selector, SelectionKey.OP_READ);
         //线程，监听服务器信息
         ReaderThread readerThread = new ReaderThread(selector);

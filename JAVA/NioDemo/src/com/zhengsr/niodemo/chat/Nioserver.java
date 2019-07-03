@@ -2,13 +2,18 @@ package com.zhengsr.niodemo.chat;
 
 import com.zhengsr.niodemo.Constants;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.InetSocketAddress;
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.channels.*;
 import java.nio.charset.Charset;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * created by zhengshaorui
@@ -27,12 +32,17 @@ public class Nioserver {
         serverSocketChannel.configureBlocking(false);
         //5.将channel注册到selector中
         serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
-        System.out.println("服务端启动成功");
+        System.out.println("服务端启动成功,开始监听...");
         boolean isFinish = false;
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        handleWrite(selector, br);
         while (!isFinish){
             //6.使用 select() 拿到channel
             int channels = selector.select();
             if (channels == 0){
+                if (isFinish){
+                    break;
+                }
                 continue;
             }
             // 7.通过selectedKeys() 拿到 selectedKeys 集合
@@ -41,6 +51,8 @@ public class Nioserver {
             while (iterator.hasNext()){
                 //拿到 selectedKeys 实例
                 SelectionKey selectionKey = iterator.next();
+                //移除 selectedKeys 实例
+                iterator.remove();
                 /**
                  * 如果是接入事件
                  */
@@ -54,10 +66,26 @@ public class Nioserver {
                 if (selectionKey.isReadable()){
                     handleRead(selectionKey,selector);
                 }
-                //移除 selectedKeys 实例
-                iterator.remove();
+
+                
             }
         }
+    }
+
+    private static void handleWrite(Selector selector, BufferedReader br)  {
+        //开个线程去监听发送
+        Executors.newSingleThreadExecutor().execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    String msg = br.readLine();
+                    broadcastMsg(selector,null,msg);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+            }
+        });
     }
 
     /**
@@ -69,13 +97,15 @@ public class Nioserver {
     private static void handleAccept(ServerSocketChannel serverSocketChannel,Selector selector) throws IOException {
         //拿到 SocketChannel 客户端
         SocketChannel socketChannel = serverSocketChannel.accept();
+        System.out.println("新客户端连接："+socketChannel.getRemoteAddress().toString());
         //设置 socketchannel 为非阻塞模式
         socketChannel.configureBlocking(false);
-        //注册读事件,这样我们才能接收到客户端的信息
+        //客户端注册读事件,这样我们才能接收到客户端的信息
         socketChannel.register(selector,SelectionKey.OP_READ);
         //发送 conected 提示服务端已经接收到
         ByteBuffer buf = Charset.forName("utf-8").encode(Constants.CLIENT_CONNECTED);
         socketChannel.write(buf);
+
     }
 
     /**
@@ -89,7 +119,7 @@ public class Nioserver {
         SocketChannel channel = (SocketChannel) selectionKey.channel();
         if (channel != null) {
             //读取channel的数据
-            ByteBuffer buf = ByteBuffer.allocate(1024);
+            ByteBuffer buf = ByteBuffer.allocate(512);
             StringBuilder sb = new StringBuilder();
             int readByte = channel.read(buf);
             while (readByte > 0) {
@@ -99,10 +129,11 @@ public class Nioserver {
                 sb.append(msg);
                 readByte = channel.read(buf);
             }
+            buf.clear();
             //将 channel 继续注册为可读事件
             channel.register(selector, SelectionKey.OP_READ);
             if (sb.length() > 0) {
-                System.out.println("client: " + sb.toString());
+                System.out.println(channel.getRemoteAddress().toString()+" : " + sb.toString());
                  //返回数据
                 //String responeMsg = sb.length();
                 //channel.write(Charset.forName("utf-8").encode(responeMsg));
@@ -113,6 +144,7 @@ public class Nioserver {
         }
 
     }
+
 
     /**
      * g
@@ -127,8 +159,11 @@ public class Nioserver {
         for (SelectionKey selectionKey : keys) {
             Channel channel =  selectionKey.channel();
             //不是自己本身,其他通道才需要拿到信息
-            if (channel instanceof SocketChannel &&
-                    channel != targetChannel ){
+            if (channel instanceof SocketChannel){
+                if (targetChannel != null &&
+                        channel == targetChannel ){
+                    continue;
+                }
                 ((SocketChannel) channel).write(Charset.forName("utf-8").encode(msg));
             }
         }
