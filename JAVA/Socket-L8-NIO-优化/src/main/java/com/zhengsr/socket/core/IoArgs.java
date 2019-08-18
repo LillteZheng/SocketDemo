@@ -6,13 +6,19 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 
 public class IoArgs {
-    private byte[] byteBuffer = new byte[256];
+    private static final int LIMIT = 128;
+    private int limit = LIMIT;
+    private byte[] byteBuffer = new byte[LIMIT];
     private ByteBuffer buffer = ByteBuffer.wrap(byteBuffer);
+
+
+
 
     public int read(SocketChannel channel) throws IOException {
         buffer.clear();
         return channel.read(buffer);
     }
+
     public String bufferString(){
         //去掉换行符
         return new String(byteBuffer,0,buffer.position() - 1);

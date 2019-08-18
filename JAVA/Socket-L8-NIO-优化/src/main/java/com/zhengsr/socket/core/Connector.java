@@ -1,6 +1,9 @@
 package com.zhengsr.socket.core;
 
 import com.zhengsr.socket.core.impl.SocketChannelAdapter;
+import com.zhengsr.socket.core.packet.async.AsyncSendDispatcher;
+import com.zhengsr.socket.core.packet.box.StringSendPacket;
+import com.zhengsr.socket.core.packet.calback.SendDispatcher;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -11,13 +14,16 @@ public class Connector implements Closeable, SocketChannelAdapter.OnChannelStatu
     private SocketChannel socketChannel;
     private Sender sender;
     private Receiver receiver;
-
+    private SendDispatcher sendDispatcher;
     public void setup(SocketChannel socketChannel) throws IOException {
         this.socketChannel = socketChannel;
         IoContext context = IoContext.get();
         SocketChannelAdapter adapter = new SocketChannelAdapter(socketChannel,this,context.getIoProvider());
         sender = adapter;
         receiver = adapter;
+
+        sendDispatcher = new AsyncSendDispatcher(sender);
+
         readNextMessage();
     }
 
@@ -40,6 +46,11 @@ public class Connector implements Closeable, SocketChannelAdapter.OnChannelStatu
                 System.out.println("接收异常: "+e.toString());
             }
         }
+    }
+
+    public void sendMsg(String msg){
+        StringSendPacket packet = new StringSendPacket(msg);
+        sendDispatcher.send(packet);
     }
 
     @Override
