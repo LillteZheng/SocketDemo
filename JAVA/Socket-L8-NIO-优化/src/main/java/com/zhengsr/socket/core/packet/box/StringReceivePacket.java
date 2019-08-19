@@ -2,8 +2,10 @@ package com.zhengsr.socket.core.packet.box;
 
 import com.zhengsr.socket.core.packet.ReceivePacket;
 
+import java.io.IOException;
+
 public class StringReceivePacket extends ReceivePacket {
-    private final byte[] buffer;
+    private byte[] buffer;
     private int position;
 
     public StringReceivePacket(int len) {
@@ -19,5 +21,10 @@ public class StringReceivePacket extends ReceivePacket {
 
     public String string(){
         return new String(buffer);
+    }
+
+    @Override
+    public void close() throws IOException {
+
     }
 }

@@ -3,6 +3,8 @@ package com.zhengsr.socket.client;
 import com.zhengsr.socket.client.bean.DeviceInfo;
 import com.zhengsr.socket.client.tcp.TcpClient;
 import com.zhengsr.socket.client.udp.UdpSearch;
+import com.zhengsr.socket.core.IoContext;
+import com.zhengsr.socket.core.impl.IoSelectorProvider;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -10,7 +12,10 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 
 public class Client {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
+        IoContext.setup()
+                .ioProvider(new IoSelectorProvider())
+                .start();
         DeviceInfo info = UdpSearch.searchServer(10000);
         System.out.println("Server:" + info);
 
@@ -32,6 +37,7 @@ public class Client {
                 }
             }
         }
+        IoContext.close();
     }
 
     private static void write(TcpClient tcpClient) throws IOException {
@@ -43,7 +49,10 @@ public class Client {
             // 键盘读取一行
             String str = input.readLine();
             // 发送到服务器
-            tcpClient.send(str);
+            tcpClient.sendMsg(str);
+            tcpClient.sendMsg(str);
+            tcpClient.sendMsg(str);
+            tcpClient.sendMsg(str);
 
             if ("00bye00".equalsIgnoreCase(str)) {
                 break;

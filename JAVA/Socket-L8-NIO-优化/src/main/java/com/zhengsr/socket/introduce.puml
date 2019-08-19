@@ -1,7 +1,35 @@
 @startuml
-start
-:Hello world;
-:This is on defined on
-several **lines**;
-end
+object IoConntext
+IoConntext : setUp()
+IoConntext : ioprovider
+IoConntext : 主要是初始化IoProvider
+
+object ClientHandler
+
+
+object Connector
+Connector : setup(SocketChannel socketChannel)
+Connector : void send(String msg) //数据发送
+Connector : onReceiveNewMessage(String str) //数据接收
+
+object AsyncSendDispatcher
+AsyncSendDispatcher : 通过 header+data 装数据
+AsyncSendDispatcher : 通过 sendCurrentPacket 发数据
+
+ClientHandler -->  Connector : 继承，实现发送接收
+Connector --> AsyncSendDispatcher : send(packet)
+
+object SocketChannelAdapter
+SocketChannelAdapter : sender 发送实现类
+SocketChannelAdapter : receiver 接收实现类
+
+AsyncSendDispatcher --> SocketChannelAdapter : sender.sendAsync(args,listener);
+
+object IoSelectorProvider
+IoSelectorProvider : 开线程监听 OP_READ,OP_WRITE
+IoSelectorProvider : 通过 handleSelection() 线程池
+IoSelectorProvider : 执行 ioprovider runnable
+
+SocketChannelAdapter --> IoSelectorProvider : ioProvider.registerOutput
+
 @enduml

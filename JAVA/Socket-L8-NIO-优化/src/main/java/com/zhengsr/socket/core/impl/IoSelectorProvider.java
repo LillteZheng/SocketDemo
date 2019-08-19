@@ -86,7 +86,7 @@ public class IoSelectorProvider implements IoProvider {
 
     private void startWrite() {
         //开启
-        Thread thread = new Thread("Clink IoSelectorProvider ReadSelector Thread"){
+        Thread thread = new Thread("Clink IoSelectorProvider WriteSelector Thread"){
             @Override
             public void run() {
                 super.run();
@@ -233,7 +233,7 @@ public class IoSelectorProvider implements IoProvider {
                 //唤醒 selector，让selector不处于 select() 状态
                 selector.wakeup();
                 //如果 channel 已经有注册过东西
-                SelectionKey key;
+                SelectionKey key = null;
                 if (channel.isRegistered()){
                     key = channel.keyFor(selector);
                     //如果已经该 key 已经被注册过了
@@ -241,7 +241,8 @@ public class IoSelectorProvider implements IoProvider {
                         //把key重新加入
                         key.interestOps(key.interestOps() | registerOps);
                     }
-                }else{
+                }
+                if (key == null){
                     //如果还没有被注册过
                     key = channel.register(selector, registerOps);
                     //并把当前的 key 和 runnable 填充到map

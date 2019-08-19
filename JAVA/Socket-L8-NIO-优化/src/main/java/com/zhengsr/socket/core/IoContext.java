@@ -1,29 +1,28 @@
 package com.zhengsr.socket.core;
 
+import com.zhengsr.socket.core.IoProvider;
+
 import java.io.IOException;
 
-/**
- * created by @author zhengshaorui on 2019/8/15
- * Describe: 上下文，主要用来初始化 IoProvider
- */
 public class IoContext {
-    private final IoProvider ioProvider;
     private static IoContext INSTANCE;
-    public IoContext(IoProvider ioProvider) {
+    private final IoProvider ioProvider;
+
+    private IoContext(IoProvider ioProvider) {
         this.ioProvider = ioProvider;
     }
 
     public IoProvider getIoProvider() {
         return ioProvider;
     }
-    public static IoContext get(){
+
+    public static IoContext get() {
         return INSTANCE;
     }
 
-    public static StartedBoot setup(){
+    public static StartedBoot setup() {
         return new StartedBoot();
     }
-
 
     public static void close() throws IOException {
         if (INSTANCE != null) {
@@ -35,15 +34,13 @@ public class IoContext {
         ioProvider.close();
     }
 
-
-    /**
-     * 用一个静态类来实现
-     */
-    public static class StartedBoot{
+    public static class StartedBoot {
         private IoProvider ioProvider;
 
-        public StartedBoot() {
+        private StartedBoot() {
+
         }
+
         public StartedBoot ioProvider(IoProvider ioProvider) {
             this.ioProvider = ioProvider;
             return this;

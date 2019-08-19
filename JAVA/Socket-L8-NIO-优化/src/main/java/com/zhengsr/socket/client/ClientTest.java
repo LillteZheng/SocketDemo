@@ -55,7 +55,7 @@ public class ClientTest {
             while (!done) {
                 for (TcpClient tcpClient : tcpClients) {
                     System.out.println("发送");
-                    tcpClient.send("Hello~~");
+                    tcpClient.sendMsg("Hello~~");
                 }
                 try {
                     Thread.sleep(1000);

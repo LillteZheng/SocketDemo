@@ -9,6 +9,7 @@ public class StringSendPacket extends SendPacket {
 
     public StringSendPacket(String msg) {
         this.bytes = msg.getBytes();
+        length = bytes.length;
     }
 
     @Override
