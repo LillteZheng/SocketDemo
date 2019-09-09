@@ -1,5 +1,8 @@
 package com.zhengsr.socket.core.packet;
 
-public abstract class ReceivePacket extends Packet {
-    public abstract void save(byte[] bytes,int count);
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+
+public abstract class ReceivePacket<T extends OutputStream> extends Packet<T> {
 }

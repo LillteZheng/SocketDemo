@@ -2,9 +2,13 @@ package com.zhengsr.socket.core.packet.box;
 
 import com.zhengsr.socket.core.packet.SendPacket;
 
+import java.io.ByteArrayInputStream;
+import java.io.Closeable;
 import java.io.IOException;
+import java.io.InputStream;
 
-public class StringSendPacket extends SendPacket {
+public class StringSendPacket extends SendPacket<ByteArrayInputStream> {
+
     public final byte[] bytes;
 
     public StringSendPacket(String msg) {
@@ -13,12 +17,7 @@ public class StringSendPacket extends SendPacket {
     }
 
     @Override
-    public byte[] bytes() {
-        return bytes;
-    }
-
-    @Override
-    public void close() throws IOException {
-
+    public ByteArrayInputStream createStream() {
+        return new ByteArrayInputStream(bytes);
     }
 }

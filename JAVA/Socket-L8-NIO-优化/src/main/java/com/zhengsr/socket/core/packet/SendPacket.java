@@ -1,10 +1,11 @@
 package com.zhengsr.socket.core.packet;
 
-public abstract class SendPacket extends Packet {
+import java.io.InputStream;
+
+public abstract class SendPacket<T extends InputStream> extends Packet<T> {
 
     public boolean isCanceled;
 
-    public abstract byte[] bytes();
 
     public boolean isCanceled() {
         return isCanceled;

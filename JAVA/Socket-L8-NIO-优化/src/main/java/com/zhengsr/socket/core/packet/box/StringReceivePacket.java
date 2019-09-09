@@ -2,29 +2,28 @@ package com.zhengsr.socket.core.packet.box;
 
 import com.zhengsr.socket.core.packet.ReceivePacket;
 
+import java.io.ByteArrayOutputStream;
+import java.io.Closeable;
 import java.io.IOException;
 
-public class StringReceivePacket extends ReceivePacket {
-    private byte[] buffer;
-    private int position;
-
+public class StringReceivePacket extends ReceivePacket<ByteArrayOutputStream> {
+    private String string;
     public StringReceivePacket(int len) {
-        buffer = new byte[len];
         length = len;
     }
 
-    @Override
-    public void save(byte[] bytes, int count) {
-        System.arraycopy(bytes,0,buffer,position,count);
-        position += count;
-    }
-
-    public String string(){
-        return new String(buffer);
+    public String string() {
+        return string;
     }
 
     @Override
-    public void close() throws IOException {
+    public void closeStream(ByteArrayOutputStream stream) throws IOException {
+        super.closeStream(stream);
+        string = new String(stream.toByteArray());
+    }
 
+    @Override
+    public ByteArrayOutputStream createStream() {
+        return new ByteArrayOutputStream((int) length);
     }
 }
