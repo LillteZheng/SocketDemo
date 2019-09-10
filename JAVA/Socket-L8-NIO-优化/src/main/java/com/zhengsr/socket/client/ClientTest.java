@@ -3,9 +3,12 @@ package com.zhengsr.socket.client;
 import com.zhengsr.socket.client.bean.DeviceInfo;
 import com.zhengsr.socket.client.tcp.TcpClient;
 import com.zhengsr.socket.client.udp.UdpSearch;
+import com.zhengsr.socket.utils.FileUtils;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 /**
@@ -14,8 +17,8 @@ import java.util.List;
  */
 public class ClientTest {
     private static boolean done;
-
     public static void main(String[] args) throws IOException {
+        File cachePath = FileUtils.getCacheDir("client/test");
         DeviceInfo info = UdpSearch.searchServer(10000);
         System.out.println("Server:" + info);
         if (info == null) {
@@ -27,7 +30,7 @@ public class ClientTest {
         final List<TcpClient> tcpClients = new ArrayList<>();
         for (int i = 0; i < 10; i++) {
             try {
-                TcpClient tcpClient = TcpClient.bindwith(info);
+                TcpClient tcpClient = TcpClient.bindwith(info, cachePath);
                 if (tcpClient == null) {
                     System.out.println("连接异常");
                     continue;

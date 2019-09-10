@@ -7,17 +7,15 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class StringSendPacket extends SendPacket<ByteArrayInputStream> {
+public class StringSendPacket extends ByteSendPacket {
 
-    public final byte[] bytes;
 
     public StringSendPacket(String msg) {
-        this.bytes = msg.getBytes();
-        length = bytes.length;
+        super(msg.getBytes());
     }
 
     @Override
-    public ByteArrayInputStream createStream() {
-        return new ByteArrayInputStream(bytes);
+    public byte type() {
+        return TYPE_MEMORY_STRING;
     }
 }

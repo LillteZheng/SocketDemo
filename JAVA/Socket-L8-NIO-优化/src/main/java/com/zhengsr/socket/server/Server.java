@@ -5,19 +5,21 @@ import com.zhengsr.socket.core.IoContext;
 import com.zhengsr.socket.core.impl.IoSelectorProvider;
 import com.zhengsr.socket.server.tcp.TcpServer;
 import com.zhengsr.socket.server.udp.UdpProvider;
+import com.zhengsr.socket.utils.FileUtils;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
 public class Server {
     public static void main(String[] args) throws IOException {
-
+        File cachePath = FileUtils.getCacheDir("server");
         IoContext.setup()
                 .ioProvider(new IoSelectorProvider())
                 .start();
 
-        TcpServer tcpServer = new TcpServer(TCPConstants.PORT_SERVER);
+        TcpServer tcpServer = new TcpServer(TCPConstants.PORT_SERVER,cachePath);
         boolean isSucceed = tcpServer.start();
         if (!isSucceed) {
             System.out.println("Start TCP server failed!");

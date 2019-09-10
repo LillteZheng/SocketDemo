@@ -3,6 +3,7 @@ package com.zhengsr.socket.core.impl.async;
 import com.zhengsr.socket.CloseUtils;
 import com.zhengsr.socket.core.IoArgs;
 import com.zhengsr.socket.core.Receiver;
+import com.zhengsr.socket.core.packet.Packet;
 import com.zhengsr.socket.core.packet.ReceivePacket;
 import com.zhengsr.socket.core.packet.box.StringReceivePacket;
 import com.zhengsr.socket.core.packet.calback.ReceiverDispatcher;
@@ -19,7 +20,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class AsyncReceiveDispatcher implements ReceiverDispatcher, IoArgs.IoArgsEventProcessor {
     private AtomicBoolean isClosed = new AtomicBoolean(false);
     private Receiver receiver;
-    private ReceivePacket<?> tempPacket;
+    private ReceivePacket<?,?> tempPacket;
     private WritableByteChannel packetChannel;
     private long position;
     private long total;
@@ -61,7 +62,10 @@ public class AsyncReceiveDispatcher implements ReceiverDispatcher, IoArgs.IoArgs
         //首包
         if (tempPacket == null){
             int length = args.readLength();
-            tempPacket = new StringReceivePacket(length);
+            //解析，是文件类型还是字符创类型
+            byte type = length > 200 ? Packet.TYPE_STREAM_FILE : Packet.TYPE_MEMORY_STRING;
+            //tempPacket = new StringReceivePacket(length);
+            tempPacket = callback.onArrivedNewPacket(type,length);
             packetChannel = Channels.newChannel(tempPacket.open());
             total = length;
             position = 0;

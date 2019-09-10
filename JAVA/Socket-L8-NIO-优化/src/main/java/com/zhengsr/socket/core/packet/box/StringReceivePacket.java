@@ -6,24 +6,15 @@ import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.IOException;
 
-public class StringReceivePacket extends ReceivePacket<ByteArrayOutputStream> {
-    private String string;
-    public StringReceivePacket(int len) {
-        length = len;
-    }
+public class StringReceivePacket extends ByteRecivePacket {
 
-    public String string() {
-        return string;
+    public StringReceivePacket(long len) {
+        super(len);
     }
 
     @Override
-    public void closeStream(ByteArrayOutputStream stream) throws IOException {
-        super.closeStream(stream);
-        string = new String(stream.toByteArray());
+    public byte type() {
+        return TYPE_MEMORY_STRING;
     }
 
-    @Override
-    public ByteArrayOutputStream createStream() {
-        return new ByteArrayOutputStream((int) length);
-    }
 }

@@ -4,16 +4,22 @@ package com.zhengsr.socket.core;
 import com.zhengsr.socket.core.impl.SocketChannelAdapter;
 import com.zhengsr.socket.core.impl.async.AsyncReceiveDispatcher;
 import com.zhengsr.socket.core.impl.async.AsyncSendDispatcher;
+import com.zhengsr.socket.core.packet.Packet;
+import com.zhengsr.socket.core.packet.ReceivePacket;
+import com.zhengsr.socket.core.packet.SendPacket;
+import com.zhengsr.socket.core.packet.box.ByteRecivePacket;
+import com.zhengsr.socket.core.packet.box.FileRecivePacket;
 import com.zhengsr.socket.core.packet.box.StringReceivePacket;
 import com.zhengsr.socket.core.packet.box.StringSendPacket;
 import com.zhengsr.socket.core.packet.calback.ReceiverDispatcher;
 import com.zhengsr.socket.core.packet.calback.SendDispatcher;
 
 import java.io.Closeable;
+import java.io.File;
 import java.io.IOException;
 import java.nio.channels.SocketChannel;
 
-public class Connector implements Closeable, SocketChannelAdapter.OnChannelStatusChangedListener {
+public abstract class Connector implements Closeable, SocketChannelAdapter.OnChannelStatusChangedListener {
     private SocketChannel socketChannel;
     private Sender sender;
     private Receiver receiver;
@@ -38,6 +44,10 @@ public class Connector implements Closeable, SocketChannelAdapter.OnChannelStatu
         sendDispatcher.send(packet);
     }
 
+    public void sendPacket(SendPacket packet){
+        sendDispatcher.send(packet);
+    }
+
     @Override
     public void close() throws IOException {
         receiverDispatcher.close();
@@ -52,15 +62,32 @@ public class Connector implements Closeable, SocketChannelAdapter.OnChannelStatu
 
     }
 
-    protected void onReceiveNewMessage(String str) {
-        //System.out.println("什么啊: "+": "+str);
+
+    protected void onReceivePacket(ReceivePacket packet) {
+        System.out.println(":[New Packet]-Type:" + packet.type() + ", Length:" + packet.length);
     }
+    public abstract File createNewReceiveFile();
 
+    ReceiverDispatcher.ReceivePacketCallback receivePacketCallback = new ReceiverDispatcher.ReceivePacketCallback() {
+        @Override
+        public ReceivePacket<?, ?> onArrivedNewPacket(byte type, long length) {
+            switch (type) {
+                case Packet.TYPE_MEMORY_BYTES:
+                    return new ByteRecivePacket(length);
+                case Packet.TYPE_MEMORY_STRING:
+                    return new StringReceivePacket(length);
+                case Packet.TYPE_STREAM_FILE:
+                    return new FileRecivePacket(length, createNewReceiveFile());
+                case Packet.TYPE_STREAM_DIRECT:
+                    return new ByteRecivePacket(length);
+                default:
+                    throw new UnsupportedOperationException("Unsupported packet type:" + type);
+            }
+        }
 
-    ReceiverDispatcher.ReceivePacketCallback receivePacketCallback = packet -> {
-        if (packet instanceof StringReceivePacket){
-            String str = ((StringReceivePacket) packet).string();
-            onReceiveNewMessage(str);
+        @Override
+        public void onReceivePacketCompleted(ReceivePacket packet) {
+            onReceivePacket(packet);
         }
     };
 }

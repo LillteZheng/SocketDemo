@@ -8,21 +8,29 @@ import java.io.InputStream;
  * 公共的数据封装
  * 封装了类型和长度
  */
-public abstract class Packet<T extends Closeable> implements Closeable {
-    protected T stream;
-    protected byte type;
-    protected long length;
+public abstract class Packet<Stream extends Closeable> implements Closeable {
 
-    public byte type(){
-        return  type;
-    }
+    // BYTES 类型
+    public static final byte TYPE_MEMORY_BYTES = 1;
+    // String 类型
+    public static final byte TYPE_MEMORY_STRING = 2;
+    // 文件 类型
+    public static final byte TYPE_STREAM_FILE = 3;
+    // 长链接流 类型
+    public static final byte TYPE_STREAM_DIRECT = 4;
+
+    protected Stream stream;
+
+    public long length;
+
+
 
     public long length(){
         return length;
     }
 
 
-    public final T open(){
+    public final Stream open(){
         if (stream == null){
             stream = createStream();
         }
@@ -38,12 +46,26 @@ public abstract class Packet<T extends Closeable> implements Closeable {
     }
 
     /**
+     * 类型，直接通过方法得到:
+     * <p>
+     * {@link #TYPE_MEMORY_BYTES}
+     * {@link #TYPE_MEMORY_STRING}
+     * {@link #TYPE_STREAM_FILE}
+     * {@link #TYPE_STREAM_DIRECT}
+     *
+     * @return 类型
+     */
+    public abstract byte type();
+
+    /**
      * 子类需要自行创建 inputstream
      * @return
      */
-    public abstract T createStream();
+    public abstract Stream createStream();
 
-    public  void closeStream(T stream) throws IOException {
+
+
+    public  void closeStream(Stream stream) throws IOException {
         stream.close();
     }
 

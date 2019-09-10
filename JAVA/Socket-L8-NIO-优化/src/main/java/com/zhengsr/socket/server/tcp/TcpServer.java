@@ -1,7 +1,13 @@
 package com.zhengsr.socket.server.tcp;
 
 import com.zhengsr.socket.CloseUtils;
+import com.zhengsr.socket.core.packet.ReceivePacket;
+import com.zhengsr.socket.core.packet.SendPacket;
+import com.zhengsr.socket.core.packet.box.FileRecivePacket;
+import com.zhengsr.socket.core.packet.box.FileSendPacket;
+import com.zhengsr.socket.core.packet.box.StringReceivePacket;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
@@ -20,8 +26,9 @@ public class TcpServer implements ClientHandler.ClientHandlerCallback {
     private List<ClientHandler> mClientHandlers = new ArrayList<>();
     private Selector selector;
     private ServerSocketChannel server;
-
-    public TcpServer(int port){
+    private File cacheFile;
+    public TcpServer(int port, File cacheFile){
+        this.cacheFile = cacheFile;
         this.port = port;
         //转发线程池
         forwordingThreadPool = Executors.newSingleThreadExecutor();
@@ -72,6 +79,12 @@ public class TcpServer implements ClientHandler.ClientHandlerCallback {
         }
     }
 
+    public synchronized void broadcastPacket(SendPacket packet){
+        for (ClientHandler clientHandler : mClientHandlers) {
+            clientHandler.sendPacket(packet);
+        }
+    }
+
 
     /**
      * 监听客户端
@@ -109,7 +122,7 @@ public class TcpServer implements ClientHandler.ClientHandlerCallback {
                             SocketChannel socketChannel = channel.accept();
 
                             //客户端构建读写异步线程
-                            ClientHandler clientHandle = new ClientHandler(socketChannel,TcpServer.this);
+                            ClientHandler clientHandle = new ClientHandler(socketChannel,TcpServer.this,cacheFile);
                            // clientHandle.readToPrint();
                             //同步，把客户端添加进来
                             synchronized (TcpServer.this){
@@ -140,9 +153,7 @@ public class TcpServer implements ClientHandler.ClientHandlerCallback {
     }
 
     @Override
-    public void onNewMessageArrived(ClientHandler handler, String msg) {
-        //打印出来
-        System.out.println(handler.getInfo()+" "+msg);
+    public void onNewMessageArrived(ClientHandler handler, ReceivePacket packet) {
 
         //异步转发数据
         forwordingThreadPool.execute(new Runnable() {
@@ -154,11 +165,23 @@ public class TcpServer implements ClientHandler.ClientHandlerCallback {
                         if (clientHandler == handler){
                             continue;
                         }
-                        clientHandler.sendMsg(msg);
+                        if (packet instanceof StringReceivePacket){
+                            String msg = new String((byte[]) packet.entity());
+                            //打印出来
+                            System.out.println(handler.getInfo()+" "+msg);
+                            clientHandler.sendMsg(msg);
+                        }else if (packet instanceof FileRecivePacket){
+                            File file = ((FileRecivePacket) packet).entity();
+                            //打印出来
+                            System.out.println(handler.getInfo()+" "+file.getAbsolutePath());
+                            clientHandler.sendPacket(new FileSendPacket(file));
+                        }
+
                     }
                 }
             }
         });
+
     }
 
     @Override
